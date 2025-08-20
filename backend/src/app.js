@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const categoriesRoutes = require('./routes/categories');
-// const questionsRoutes = require('./routes/questions');
+const questionsRoutes = require('./routes/questions');
 // const submitRoutes = require('./routes/submit');
 // const hintRoutes = require('./routes/hint');
 // const optimizedRoutes = require('./routes/optimized');
@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/categories', categoriesRoutes);
-// app.use('/api/questions', questionsRoutes);
+app.use('/api/questions', questionsRoutes);
 // app.use('/api/submit', submitRoutes);
 // app.use('/api/hint', hintRoutes);
 // app.use('/api/optimized', optimizedRoutes);
