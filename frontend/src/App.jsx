@@ -5,6 +5,7 @@ import Questions from './pages/Questions';
 import Workspace from './pages/Workspace';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -46,13 +47,17 @@ function App() {
         <Route
           path="/"
           element={
-            <Home 
+            <LandingPage 
               onSelectCategory={(category) => {
                 setSelectedCategory(category);
                 window.location.href = `/questions/${category}`;
               }} 
             />
           }
+        />
+        <Route
+          path="/home"
+          element={<Home />}
         />
         <Route
           path="/questions/:category"

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Navbar from '../components/Navbar';
 
 const statsData = {
   totalQuestions: 48,
@@ -47,6 +48,7 @@ export default function Dashboard({ user }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <Navbar />
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
