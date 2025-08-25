@@ -272,11 +272,11 @@ export default function LandingPage({ onSelectCategory }) {
     <div className="min-h-screen bg-white">
       <Navbar />
       {/* Hero Section */}
-      <section id="home" className="pt-25 pb-20 px-6 lg:px-8">
+      <section id="home" className="h-screen pt-25 pb-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              
+
+            <div>  
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-8">
                 Master AI Coding with 
                 <span className="block bg-gradient-to-r from-violet-500 to-purple-600 bg-clip-text text-transparent">
