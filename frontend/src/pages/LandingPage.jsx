@@ -1,282 +1,207 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 
-const CodeWindow = () => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentLine, setCurrentLine] = useState(0);
-  const [showCursor, setShowCursor] = useState(true);
+// === Helper: Gradient button classes ===
+const primaryBtn =
+  "relative inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-white transition focus:outline-none focus:ring-4 focus:ring-blue-500/30";
+const secondaryBtn =
+  "relative inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold border border-white/10 text-white/90 transition hover:bg-white/5 focus:outline-none focus:ring-4 focus:ring-cyan-500/20";
 
-  const codeLines = [
-    '# Building a neural network classifier',
-    'import numpy as np',
-    'from sklearn.neural_network import MLPClassifier',
-    '',
-    'def train_model(X_train, y_train):',
-    '    model = MLPClassifier(',
-    '        hidden_layer_sizes=(100, 50),',
-    '        activation=\'relu\',',
-    '        random_state=42',
-    '    )',
-    '    return model.fit(X_train, y_train)'
-  ];
+const gradientBg = {
+  background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
+};
 
-  React.useEffect(() => {
-    if (currentLine >= codeLines.length) return;
+// === Code typing showcase ===
+function CodeShowcase() {
+  const [text, setText] = useState("");
+  const [cursor, setCursor] = useState(true);
 
-    const fullText = codeLines.slice(0, currentLine + 1).join('\n');
-    const targetText = fullText;
+  const lines = useMemo(
+    () => [
+      "# Solving: Multi-Class Image Classifier",
+      "import numpy as np",
+      "from sklearn.model_selection import train_test_split",
+      "from sklearn.metrics import accuracy_score",
+      "from sklearn.neural_network import MLPClassifier",
+      "",
+      "X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)",
+      "model = MLPClassifier(hidden_layer_sizes=(256,128), activation='relu', learning_rate_init=1e-3)",
+      "model.fit(X_train, y_train)",
+      "preds = model.predict(X_test)",
+      "print('Accuracy:', accuracy_score(y_test, preds))",
+    ],
+    []
+  );
 
-    if (displayedText.length < targetText.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText(targetText.slice(0, displayedText.length + 1));
-      },60); // Random typing speed between 30-80ms
-      
-      return () => clearTimeout(timeout);
-    } else if (currentLine < codeLines.length - 1) {
-      const timeout = setTimeout(() => {
-        setCurrentLine(prev => prev + 1);
-      }, 300); // Pause between lines
-      
-      return () => clearTimeout(timeout);
+  useEffect(() => {
+    const full = lines.join("\n");
+    if (text.length < full.length) {
+      const t = setTimeout(() => setText(full.slice(0, text.length + 1)), 18);
+      return () => clearTimeout(t);
     }
-  }, [displayedText, currentLine, codeLines]);
+  }, [text, lines]);
 
-  // Cursor blinking effect
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [displayedText, currentLine, codeLines]);
-
-  const formatCodeLine = (line, index) => {
-    if (line.startsWith('#')) {
-      return <span className="text-gray-500">{line}</span>;
-    } 
-    else if (line.startsWith('import') || line.startsWith('from')) {
-      const parts = line.split(' ');
-      return (
-        <span>
-          <span className="text-blue-400">{parts[0]} </span>
-          {parts.slice(1).map((part, i) => (
-            <span key={i} className={part === 'as' || part === 'import' ? 'text-blue-400' : 'text-white'}>
-              {i > 0 ? ' ' : ''}{part}
-            </span>
-          ))}
-        </span>
-      );
-    } 
-    else if (line.startsWith('def ')) {
-      return (
-        <span>
-          <span className="text-purple-400">def </span>
-          <span className="text-yellow-300">train_model</span>
-          <span className="text-white">(X_train, y_train):</span>
-        </span>
-      );
-    } else if (line.includes('MLPClassifier')) {
-      return (
-        <span className="text-white ml-4">
-          model = <span className="text-green-400">MLPClassifier</span>(
-        </span>
-      );
-    } else if (line.includes('hidden_layer_sizes')) {
-      return (
-        <span className="text-white ml-8">
-          hidden_layer_sizes=(<span className="text-orange-400">100, 50</span>),
-        </span>
-      );
-    } else if (line.includes('activation')) {
-      return (
-        <span className="text-white ml-8">
-          activation=<span className="text-green-300">'relu'</span>,
-        </span>
-      );
-    } else if (line.includes('random_state')) {
-      return (
-        <span className="text-white ml-8">
-          random_state=<span className="text-orange-400">42</span>
-        </span>
-      );
-    } else if (line.includes('return')) {
-      return <span className="text-white ml-4">return model.fit(X_train, y_train)</span>;
-    } else if (line.trim() === ')') {
-      return <span className="text-white ml-4">)</span>;
-    }
-    
-    return <span className="text-white">{line}</span>;
-  };
+  useEffect(() => {
+    const i = setInterval(() => setCursor((c) => !c), 600);
+    return () => clearInterval(i);
+  }, []);
 
   return (
-    <div className="relative bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
-      <div className="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+    <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#0B0B0C]">
+      {/* window chrome */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0F0F10]/90 backdrop-blur">
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-red-500/80" />
+          <span className="w-3 h-3 rounded-full bg-yellow-400/80" />
+          <span className="w-3 h-3 rounded-full bg-green-500/80" />
         </div>
-        <div className="text-gray-400 text-sm font-mono">neural_network.py</div>
-        <div className="w-16"></div>
+        <div className="text-xs text-white/60 font-mono">classifier.py</div>
+        <div className="w-16" />
       </div>
-      <div className="p-6 font-mono text-sm min-h-[300px]">
-        {displayedText.split('\n').map((line, index) => (
-          <div key={index} className="mb-1">
-            {formatCodeLine(line, index)}
-            {index === displayedText.split('\n').length - 1 && showCursor && (
-              <span className="text-white animate-pulse">|</span>
-            )}
-          </div>
-        ))}
-        
-        {currentLine >= codeLines.length - 1 && (
-          <div className="flex items-center mt-4 pt-4 border-t border-gray-700">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-green-400 text-xs">Ready to execute</span>
-          </div>
-        )}
+
+      {/* code area */}
+      <div className="relative p-6 font-mono text-sm leading-6 min-h-[320px] text-white">
+        {/* grid/scan effect */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(139,92,246,0.12),transparent_30%)]" />
+        <pre className="relative whitespace-pre-wrap">
+          {text}
+          <span className={`ml-0.5 ${cursor ? "opacity-100" : "opacity-0"}`}>|
+          </span>
+        </pre>
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
       </div>
     </div>
   );
-};
+}
 
-// Feature Card
-const FeatureCard = ({ icon, title, description, gradient }) => (
-  <div className="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100">
-    <div className="absolute inset-0 bg-gradient-to-r from-gray-50 to-gray-100 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-    <div className="relative z-10">
-      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${gradient} shadow-lg mb-6`}>
-        {icon}
+// === Simple icon (inline SVG) ===
+function Icon({ path, className = "w-6 h-6" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d={path} />
+    </svg>
+  );
+}
+
+// === Feature Card ===
+function FeatureCard({ iconPath, title, description }) {
+  return (
+    <motion.div
+      whileHover={{ y: -4 }}
+      className="relative rounded-2xl p-[1px] bg-gradient-to-br from-cyan-500/30 to-violet-500/30"
+    >
+      <div className="relative h-full rounded-2xl bg-[#0F0F10]/80 backdrop-blur-xl border border-white/10 p-6">
+        <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-xl text-cyan-300 bg-white/5 ring-1 ring-cyan-500/20">
+          <Icon className="w-6 h-6" path={iconPath} />
+        </div>
+        <h3 className="text-white font-semibold text-lg mb-2">{title}</h3>
+        <p className="text-white/70 text-sm leading-6">{description}</p>
+        <div className="pointer-events-none absolute -inset-px rounded-2xl shadow-[0_0_60px_-10px_rgba(59,130,246,0.25)]" />
       </div>
-      <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-violet-600 transition">
-        {title}
-      </h3>
-      <p className="text-gray-600 leading-relaxed">
-        {description}
-      </p>
-    </div>
-  </div>
-);
+    </motion.div>
+  );
+}
 
-//  Metric Card
-const MetricCard = ({ number, label, suffix = "" }) => (
-  <div className="text-center">
-    <div className="text-3xl font-bold text-gray-900 mb-1">
-      {number}{suffix}
-    </div>
-    <div className="text-gray-600 text-sm font-medium">{label}</div>
-  </div>
-);
+// === Category Card ===
+function CategoryCard({ code, name, problems, gradient }) {
+  return (
+    <motion.div
+      whileHover={{ y: -4, scale: 1.01 }}
+      className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#0F0F10]"
+      style={{ boxShadow: "0 10px 40px rgba(0,0,0,0.35)" }}
+    >
+      <div className="absolute inset-0 opacity-80" style={{ background: gradient }} />
+      <div className="relative p-6 backdrop-blur-sm">
+        <div className="flex items-start justify-between mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-black/60 text-white font-bold text-lg border border-white/10">
+            {code}
+          </div>
+          <div className="text-right text-white">
+            <div className="text-2xl font-bold">{problems}</div>
+            <div className="text-white/70 text-xs">Problems</div>
+          </div>
+        </div>
+        <h4 className="text-white font-semibold text-xl mb-1">{name}</h4>
+        <p className="text-white/70 text-sm">Dive into curated challenges with real datasets & evaluation.</p>
+        <div className="mt-4 inline-flex items-center text-cyan-300 font-medium">
+          Start Learning
+          <svg className="w-5 h-5 ml-1 group-hover:translate-x-1 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute inset-0 ring-1 ring-white/10 rounded-2xl" />
+    </motion.div>
+  );
+}
 
-export default function LandingPage({ onSelectCategory }) {
-  const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const categories = [
-    { 
-      name: "Artificial Intelligence", 
-      code: "AI",
-      description: "Neural networks, search algorithms, expert systems",
-      color: "from-violet-500 to-purple-500",
-      questions: 24 
-    },
-    { 
-      name: "Machine Learning", 
-      code: "ML", 
-      description: "Supervised learning, clustering, feature engineering",
-      color: "from-cyan-400 to-blue-500",
-      questions: 32 
-    },
-    { 
-      name: "Deep Learning", 
-      code: "DL", 
-      description: "CNNs, RNNs, transformers, computer vision",
-      color: "from-emerald-400 to-green-500",
-      questions: 28 
-    },
-    { 
-      name: "Generative AI", 
-      code: "GenAI", 
-      description: "LLMs, RAG, fine-tuning, prompt engineering",
-      color: "from-pink-400 to-rose-500",
-      questions: 18 
-    }
-  ];
-
+export default function LandingPage() {
   const features = [
     {
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      title: "AI-Powered Code Reviews",
-      description: "Get instant feedback on your code quality, efficiency, and best practices from advanced language models.",
-      gradient: "bg-gradient-to-br from-violet-500 to-purple-600"
+      iconPath: "M3 12h7l-2 9 5-16 2 7h6",
+      title: "Real-world AI Problems",
+      description: "Work on industry-grade tasks spanning vision, NLP, and tabular ML with clear constraints and datasets.",
     },
     {
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-        </svg>
-      ),
-      title: "Professional IDE Experience",
-      description: "Code in a full-featured Monaco editor with syntax highlighting, autocomplete, and real-time error detection.",
-      gradient: "bg-gradient-to-br from-cyan-400 to-blue-500"
+      iconPath: "M12 20l4-8H8l4-8M4 20h16",
+      title: "Hints & Solutions",
+      description: "Unlock multi-step hints, editorial-grade explanations, and benchmark solutions when you’re stuck.",
     },
     {
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-      title: "Performance Analytics",
-      description: "Track your progress with detailed analytics, performance metrics, and personalized learning insights.",
-      gradient: "bg-gradient-to-br from-emerald-400 to-green-500"
+      iconPath: "M8 21v-7m8 7v-4M4 10l8-6 8 6-8 6-8-6z",
+      title: "Leaderboards",
+      description: "Compete on accuracy, runtime, and memory; climb weekly and all-time boards across tracks.",
     },
     {
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-        </svg>
-      ),
-      title: "Adaptive Learning Path",
-      description: "Personalized question recommendations based on your skill level, progress, and learning objectives.",
-      gradient: "bg-gradient-to-br from-pink-400 to-rose-500"
-    }
+      iconPath: "M4 4h16v8H4V4zm0 12h10",
+      title: "Custom Test Cases",
+      description: "Create edge-case generators, run hidden tests, and compare diffs directly in the editor.",
+    },
   ];
 
-  const testimonials = [
+  const categories = [
     {
-      name: "Rajeev Kumar",
-      role: "DSAI | IIT Bhilai",
-      avatar: "image1.png",
-      content: "Code is my canvas, builds to make ideas real."
+      code: "AI",
+      name: "Artificial Intelligence",
+      problems: 42,
+      gradient: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.18))",
     },
     {
-      name: "Aditya Rehpade",
-      role: "EE | IIT Bhilai",
-      avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbNEGyS86n8xeGzl9O6x6K-vqvuokL0_g97Q&s",
-      content: "Finally, a platform that understands the nuances of AI/ML algorithm implementation."
-    }
+      code: "ML",
+      name: "Machine Learning",
+      problems: 58,
+      gradient: "linear-gradient(135deg, rgba(6,182,212,0.20), rgba(59,130,246,0.18))",
+    },
+    {
+      code: "DL",
+      name: "Deep Learning",
+      problems: 51,
+      gradient: "linear-gradient(135deg, rgba(139,92,246,0.20), rgba(6,182,212,0.18))",
+    },
+    {
+      code: "GenAI",
+      name: "Generative AI",
+      problems: 37,
+      gradient: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.25))",
+    },
   ];
 
-  const handleEmailSubmit = (e) => {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+
+  function submit(e) {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
-  };
+    setSent(true);
+    setTimeout(() => setSent(false), 2500);
+  }
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       {/* Hero Section */}
-      <section id="home" className="h-screen pt-25 pb-20 px-6 lg:px-8">
+      <section id="home" className="pt-25 pb-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-            <div>  
+            <div>
+              
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-8">
                 Master AI Coding with 
                 <span className="block bg-gradient-to-r from-violet-500 to-purple-600 bg-clip-text text-transparent">
@@ -301,202 +226,162 @@ export default function LandingPage({ onSelectCategory }) {
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-8">
-                <MetricCard number="--" label="Active Learners" />
-                <MetricCard number="500+" label="Code Problems" />
-                <MetricCard number="--" label="Success Rate" suffix="%" />
+            <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
+              <div>
+                <div className="text-2xl font-bold text-white">500+</div>
+                <div className="text-xs text-white/60">Problems</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-cyan-400">⏱️</div>
+                <div className="text-xs text-white/60">Runtime Scoring</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-violet-400">⚡</div>
+                <div className="text-xs text-white/60">Editor Hints</div>
               </div>
             </div>
-            <div>
-              <div className="flex justify-end ">
-                <div className="inline-flex items-center bg-violet-50   text-violet-600 px-4 py-2 rounded-full text-sm font-medium mb-8">
-                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  AI-Powered Learning Platform
-                </div>
-
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
-                <CodeWindow />
-              </div>
-
-            </div>
-            
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-cyan-300 text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              AI-Powered Learning Platform
+            </div>
+            <CodeShowcase />
+          </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Why Choose Our Platform?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We've built the most advanced AI coding platform with features that adapt to your learning style
+
+      {/* FEATURES */}
+      <section id="features" className="relative py-20 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold">Why Choose CodeAI?</h2>
+            <p className="mt-3 text-white/70 max-w-2xl mx-auto">
+              A developer-first platform with futuristic UI and rigorous evaluations.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <FeatureCard key={index} {...feature} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((f, i) => (
+              <FeatureCard key={i} {...f} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section id="categories" className="py-20 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Choose Your Learning Path
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Master different areas of artificial intelligence with our curated question sets
+      {/* CATEGORIES */}
+      <section id="categories" className="relative py-20 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold">Choose Your Track</h2>
+            <p className="mt-3 text-white/70 max-w-2xl mx-auto">
+              Curated paths across AI disciplines with neon-glow interactions.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                onClick={() => onSelectCategory(category.code)}
-                className="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:-translate-y-2"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {categories.map((c, i) => (
+              <CategoryCard key={i} {...c} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section id="testimonials" className="relative py-20 border-t border-white/10 bg-[#0F0F10]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold">Loved by Learners</h2>
+            <p className="mt-3 text-white/70">Real stories from developers mastering AI.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[{
+              name: "Rajeev Kumar",
+              role: "DSAI · IIT Bhilai",
+              quote: "Clean UI, great problems, and editorial solutions that actually teach.",
+              avatar: "https://i.pravatar.cc/120?img=11",
+            }, {
+              name: "Aditya Rehpade",
+              role: "EE · IIT Bhilai",
+              quote: "Finally a platform tuned for AI workflows—from datasets to metrics.",
+              avatar: "https://i.pravatar.cc/120?img=12",
+            }, {
+              name: "Sana Iqbal",
+              role: "ML Engineer",
+              quote: "Leaderboards kept me accountable. The glow UI is slick.",
+              avatar: "https://i.pravatar.cc/120?img=32",
+            }].map((t, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -3 }}
+                className="rounded-2xl p-6 border border-white/10 bg-white/5 backdrop-blur-xl"
               >
-                <div className={`absolute inset-0 bg-gradient-to-r ${category.color} rounded-3xl opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                
-                <div className="flex items-start justify-between mb-6">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${category.color} shadow-lg`}>
-                    <span className="text-white font-bold text-xl">{category.code}</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900">{category.questions}</div>
-                    <div className="text-gray-500 text-sm">Problems</div>
-                  </div>
-                </div>
-                
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-violet-600 transition">
-                  {category.name}
-                </h3>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  {category.description}
-                </p>
-                
-                <div className="flex items-center text-violet-600 font-semibold group-hover:text-violet-700 transition">
-                  Start Learning
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Trusted by Industry Leaders
-            </h2>
-            <p className="text-xl text-gray-600">
-              Join thousands of developers who've advanced their careers with our platform
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-20 px-50">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
-                <div className="flex items-center mb-5">
-                  <img 
-                    src={testimonial.avatar} 
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover mr-4"
-                  />
+                <div className="flex items-center gap-4 mb-4">
+                  <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover" />
                   <div>
-                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                    <div className="text-gray-600 text-sm">{testimonial.role}</div>
+                    <div className="font-semibold">{t.name}</div>
+                    <div className="text-xs text-white/70">{t.role}</div>
                   </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed italic">
-                  "{testimonial.content}"
-                </p>
-                {/* <div className="flex text-yellow-400 mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div> */}
-              </div>
+                <p className="text-white/80 leading-6">“{t.quote}”</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 lg:px-8 bg-gradient-to-r from-violet-500 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Ready to Level Up Your AI Skills?
-          </h2>
-          <p className="text-xl mb-10 opacity-90">
-            Join our community and start practicing with AI-powered feedback today
-          </p>
-          
-          <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto mb-8">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              className="flex-1 px-6 py-4 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-4 focus:ring-white/30"
-              required
-            />
-            <button
-              type="submit"
-              disabled={isSubmitted}
-              className="bg-white text-violet-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition shadow-lg disabled:opacity-50"
-            >
-              {isSubmitted ? "Sent!" : "Get Started"}
-            </button>
-          </form>
-          
-          <p className="text-sm opacity-75">
-            Free. No credit card required.
-          </p>
+      {/* CTA */}
+      <section id="cta" className="relative py-20 border-t border-white/10">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <div className="rounded-3xl p-[1px]" style={gradientBg}>
+            <div className="rounded-3xl bg-[#0B0B0C] px-6 md:px-14 py-14">
+              <h3 className="text-3xl md:text-4xl font-extrabold mb-3">Ready to Level Up?</h3>
+              <p className="text-white/70 mb-8">Join and start solving AI challenges with editor hints and analytics.</p>
+
+              <form onSubmit={submit} className="max-w-xl mx-auto flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 placeholder-white/40 focus:outline-none focus:ring-4 focus:ring-violet-500/20"
+                />
+                <button
+                  type="submit"
+                  disabled={sent}
+                  className={`${primaryBtn} disabled:opacity-60`}
+                  style={gradientBg}
+                >
+                  {sent ? "Sent!" : "Get Started"}
+                </button>
+              </form>
+              <div className="mt-3 text-xs text-white/60">Free • No credit card required</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-6 lg:px-8 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-2xl font-bold">CodeAI</span>
-            </div>
-            
-            <div className="flex items-center space-x-8">
-              <a href="#" className="text-gray-400 hover:text-white transition">Privacy</a>
-              <a href="#" className="text-gray-400 hover:text-white transition">Terms</a>
-              <a href="#" className="text-gray-400 hover:text-white transition">Support</a>
-            </div>
+      {/* FOOTER */}
+      <footer className="border-t border-white/10 py-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg" style={gradientBg} />
+            <span className="font-semibold">CodeAI</span>
           </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 CodeAI. Built with love for the AI community.</p>
+          <div className="flex items-center gap-6 text-white/70">
+            <a href="#" className="hover:text-white">Privacy</a>
+            <a href="#" className="hover:text-white">Terms</a>
+            <a href="#" className="hover:text-white">Support</a>
           </div>
+          <div className="text-white/50 text-sm">© {new Date().getFullYear()} CodeAI. All rights reserved.</div>
         </div>
       </footer>
     </div>
