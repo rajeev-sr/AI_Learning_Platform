@@ -194,37 +194,66 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      {/* Hero Section */}
-      <section id="home" className="pt-25 pb-20 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-8">
-                Master AI Coding with 
-                <span className="block bg-gradient-to-r from-violet-500 to-purple-600 bg-clip-text text-transparent">
-                  Expert Feedback
-                </span>
-              </h1>
-              
-              <p className="text-xl text-gray-600 leading-relaxed mb-10">
-                Practice real-world AI, ML, and Deep Learning problems with instant code reviews, 
-                optimization suggestions, and personalized learning paths powered by advanced LLMs.
-              </p>
+    <div className="min-h-screen bg-[#000000] text-white">
+      {/* decorative background */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-[#0F0F10]" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1100px] h-[1100px] rounded-full blur-3xl opacity-30" style={gradientBg} />
+        <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
+      </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                <button 
-                  onClick={() => document.getElementById('categories').scrollIntoView({ behavior: 'smooth' })}
-                  className="bg-gradient-to-r from-violet-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition shadow-lg text-lg"
-                >
-                  Start Coding Now
-                </button>
-                <button className="border-2 border-violet-200 text-violet-700 px-8 py-4 rounded-xl font-semibold hover:border-violet-300 hover:bg-violet-50 transition text-lg">
-                  Watch Demo
-                </button>
-              </div>
+      {/* NAV */}
+      <header className="sticky top-0 z-40 border-b border-white/10 backdrop-blur bg-[#000000]/60">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl" style={gradientBg} />
+            <span className="font-bold tracking-tight text-white">CodeAI</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-8 text-white/70">
+            <a href="#features" className="hover:text-white transition">Features</a>
+            <a href="#categories" className="hover:text-white transition">Categories</a>
+            <a href="#testimonials" className="hover:text-white transition">Stories</a>
+          </nav>
+          <a href="#cta" className="hidden md:inline-flex text-sm px-4 py-2 rounded-lg border border-white/10 hover:bg-white/5">Get Started</a>
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="relative">
+        <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-5xl md:text-6xl font-extrabold leading-tight"
+            >
+              <span className="block">Master AI</span>
+              {/* FIXED gradient text */}
+              <span className="block bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500 bg-clip-text text-transparent">
+                Problem-Solving
+              </span>
+            </motion.h1>
+
+            <p className="mt-6 text-white/70 text-lg max-w-xl">
+              Practice AI, ML, DL, and Generative AI challenges with an editor, hints, analytics, and leaderboard—built for developers.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              {/* FIXED gradient button */}
+              <a
+                href="#categories"
+                className="px-6 py-3 rounded-xl font-medium text-white shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500 hover:opacity-90 hover:shadow-cyan-500/40"
+              >
+                Start Coding
+              </a>
+              <a
+                href="#features"
+                className="px-6 py-3 rounded-xl font-medium border border-white/20 text-white hover:border-cyan-400 hover:text-cyan-300 transition"
+              >
+                View Features
+              </a>
+            </div>
 
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               <div>
