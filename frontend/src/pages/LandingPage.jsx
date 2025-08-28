@@ -49,6 +49,15 @@ function CodeShowcase() {
     return () => clearInterval(i);
   }, []);
 
+  // simple syntax highlighting function
+  function highlight(code) {
+    return code
+      .replace(/(#.*)/g, `<span class="text-green-400">$1</span>`) // comments
+      .replace(/\b(import|from|class|def|return|print|for|while|if|else|elif|as|with)\b/g, `<span class="text-pink-400">$1</span>`) // keywords
+      .replace(/('[^']*'|"[^"]*")/g, `<span class="text-amber-300">$1</span>`) // strings
+      .replace(/\b\d+(\.\d+)?\b/g, `<span class="text-cyan-300">$&</span>`); // numbers
+  }
+
   return (
     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#0B0B0C]">
       {/* window chrome */}
@@ -63,14 +72,18 @@ function CodeShowcase() {
       </div>
 
       {/* code area */}
-      <div className="relative p-6 font-mono text-sm leading-6 min-h-[320px] text-white">
-        {/* grid/scan effect */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(139,92,246,0.12),transparent_30%)]" />
-        <pre className="relative whitespace-pre-wrap">
-          {text}
-          <span className={`ml-0.5 ${cursor ? "opacity-100" : "opacity-0"}`}>|
-          </span>
-        </pre>
+      <div className="relative p-6 font-mono text-sm leading-6 min-h-[360px] text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.12),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(139,92,246,0.1),transparent_30%)]" />
+        
+        <pre
+          className="relative whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{
+            __html:
+              highlight(text) +
+              `<span class="${cursor ? "opacity-100" : "opacity-0"}">|</span>`,
+          }}
+        />
+        
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
       </div>
     </div>
@@ -223,27 +236,25 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="relative">
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-6 pt-28 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-5xl md:text-6xl font-extrabold leading-tight"
+              className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight"
             >
               <span className="block">Master AI</span>
-              {/* FIXED gradient text */}
               <span className="block bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500 bg-clip-text text-transparent">
                 Problem-Solving
               </span>
             </motion.h1>
 
-            <p className="mt-6 text-white/70 text-lg max-w-xl">
+            <p className="mt-8 text-white/70 text-lg md:text-xl max-w-xl leading-relaxed">
               Practice AI, ML, DL, and Generative AI challenges with an editor, hints, analytics, and leaderboard—built for developers.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              {/* FIXED gradient button */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <a
                 href="#categories"
                 className="px-6 py-3 rounded-xl font-medium text-white shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500 hover:opacity-90 hover:shadow-cyan-500/40"
@@ -257,37 +268,24 @@ export default function LandingPage() {
                 View Features
               </a>
             </div>
-
-            <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
-              <div>
-                <div className="text-2xl font-bold text-white">500+</div>
-                <div className="text-xs text-white/60">Problems</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-cyan-400">⏱️</div>
-                <div className="text-xs text-white/60">Runtime Scoring</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-violet-400">⚡</div>
-                <div className="text-xs text-white/60">Editor Hints</div>
-              </div>
-            </div>
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            className="flex justify-center"
           >
-            <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-cyan-300 text-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              AI-Powered Learning Platform
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-cyan-300 text-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                AI-Powered Learning Platform
+              </div>
+              <CodeShowcase />
             </div>
-            <CodeShowcase />
           </motion.div>
         </div>
       </section>
-
 
       {/* FEATURES */}
       <section id="features" className="relative py-20 border-t border-white/10">
