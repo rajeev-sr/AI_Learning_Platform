@@ -1,15 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
-/**
- * LandingPage.jsx
- * - React + Tailwind v4 friendly
- * - Fixed-size, scrollable CodeShowcase to avoid layout shifts
- * - Robust tokenizer highlighter (safe HTML encoding)
- * - Consistent button styling and responsive layout
- */
-
-/* -------------------- Shared classes / inline gradient -------------------- */
 const btnBase =
   "inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition focus:outline-none focus-visible:ring-4";
 const primaryBtnBase = `${btnBase} text-white shadow-lg`;
@@ -183,7 +174,7 @@ function CodeShowcase() {
       </div>
 
       {/* code area (fixed height, scrollable) */}
-      <div className="relative p-6 font-mono text-sm leading-6 h-[calc(100%-3rem)] overflow-y-auto text-white">
+      <div className="relative p-6 font-mono text-sm leading-6 h-[calc(100%-3rem)] overflow-y-auto text-white custom-scrollbar">
         {/* radial subtle color */}
         <div
           className="pointer-events-none absolute inset-0"
@@ -209,12 +200,37 @@ function CodeShowcase() {
         />
       </div>
 
-      {/* small inline styles (keyframes) */}
+      {/* small inline styles (keyframes + scrollbar fallback for older browsers) */}
       <style>{`
         @keyframes shimmerAnim { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
         @keyframes cursorGlowAnim { 0%{ text-shadow: 0 0 2px rgba(6,182,212,0.7); } 50%{ text-shadow: 0 0 8px rgba(6,182,212,0.85); } 100%{ text-shadow: 0 0 2px rgba(6,182,212,0.7); } }
         .shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent); background-size: 200% 100%; animation: shimmerAnim 6s linear infinite; }
         .cursorGlow { animation: cursorGlowAnim 1.2s steps(1,end) infinite; color: #9be7ff; }
+
+        /* Themed custom scrollbar (WebKit) */
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          border: 2px solid rgba(11,11,12,0.55); /* inner border to blend with background */
+          background: linear-gradient(180deg, rgba(59,130,246,0.25), rgba(139,92,246,0.16));
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, rgba(59,130,246,0.38), rgba(139,92,246,0.26));
+        }
+
+        /* Firefox */
+        .custom-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(59,130,246,0.25) transparent; }
+
+        /* Global page scrollbar fallback (applies to body) */
+        body::-webkit-scrollbar { width: 10px; height: 10px; }
+        body::-webkit-scrollbar-track { background: transparent; }
+        body::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          border: 2px solid rgba(0,0,0,0.55);
+          background: linear-gradient(180deg, rgba(59,130,246,0.18), rgba(139,92,246,0.12));
+        }
+        body { scrollbar-color: rgba(59,130,246,0.18) transparent; }
       `}</style>
     </div>
   );
@@ -367,8 +383,8 @@ export default function LandingPage() {
       </header>
 
       {/* HERO */}
-      <section className="relative">
-        <div className="max-w-7xl mx-auto px-6 pt-10 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
+      <section className="relative -mt-4">
+        <div className="max-w-7xl mx-auto px-6 h-screen pb-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
           {/* Left: text */}
           <div className="flex flex-col justify-center">
             <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl md:text-6xl lg:text-6xl font-extrabold leading-tight">
