@@ -1,150 +1,383 @@
-import React from "react";
+import { useState, useEffect } from 'react';
+import { Play, Send, Lightbulb, Clock, CheckCircle, XCircle } from 'lucide-react';
+import NavbarApp from '../components/NavbarApp';
+import Button from '../components/Button';
+import CodeShowcase from '../components/CodeShowcase';
+import MetricCard from '../components/MetricCard';
 
-// Ideally, set your base font in Tailwind config or index.css as:
-// font-family: 'Inter', 'IBM Plex Sans', 'Segoe UI', 'Arial', sans-serif;
+/**
+ * Main authenticated workspace for solving AI problems
+ * Includes problem list, detail view, code editor, and results
+ */
+const Home = () => {
+  const [selectedProblem, setSelectedProblem] = useState(null);
+  const [showHints, setShowHints] = useState(false);
+  const [userCode, setUserCode] = useState('');
+  const [testResults, setTestResults] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
 
-const categories = [
-  {
-    key: "ai",
-    title: "Artificial Intelligence",
-    desc: "Logic, search, and problem-solving challenges.",
-    link: "/problems/ai",
-    icon: "🤖",
-  },
-  {
-    key: "ml",
-    title: "Machine Learning",
-    desc: "Regression, classification, and clustering.",
-    link: "/problems/ml",
-    icon: "📊",
-  },
-  {
-    key: "deep",
-    title: "Deep Learning",
-    desc: "CNNs, RNNs, and modern architectures.",
-    link: "/problems/deep-learning",
-    icon: "🧠",
-  },
-  {
-    key: "genai",
-    title: "Generative AI",
-    desc: "LLMs, GANs, and creative models.",
-    link: "/problems/gen-ai",
-    icon: "✨",
-  },
-];
+  // Mock user data
+  const mockUser = {
+    name: 'Alex Chen',
+    score: 1847,
+    level: 'Advanced',
+    streak: 12
+  };
 
-const questions = [
-  { title: "Implement a Perceptron classifier", level: "Easy", domain: "ML" },
-  { title: "Text summarization with Transformers", level: "Medium", domain: "Gen AI" },
-  { title: "Vision classification with CNNs", level: "Hard", domain: "Deep Learning" },
-  { title: "AI: Minimax for turn-based game", level: "Medium", domain: "AI" },
-];
+  // Mock problems data
+  const problems = [
+    {
+      id: 1,
+      title: 'Neural Network Backpropagation',
+      difficulty: 'Medium',
+      category: 'Deep Learning',
+      solved: true,
+      likes: 234,
+      description: 'Implement backpropagation algorithm for a multi-layer neural network.',
+      starterCode: `import numpy as np
 
-const HomePage = () => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 text-gray-100 font-sans">
-    {/* Navbar */}
-  <header className="bg-gray-950/90 border-b border-gray-800 sticky top-0 z-40 shadow-lg backdrop-blur">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <img src="/mylogo.png" alt="CodeAI Logo" className="h-8 w-8 rounded-full border border-blue-900 shadow" />
-          <h1 className="text-3xl font-extrabold tracking-tight text-blue-300 font-sans">CodeAI</h1>
-        </div>
-        <nav className="flex space-x-8 text-base font-semibold">
-          <a href="/dashboard" className="hover:text-blue-300 focus:outline focus:ring-2 focus:ring-blue-900">Dashboard</a>
-          <a href="/problems" className="hover:text-blue-300 focus:outline focus:ring-2 focus:ring-blue-900">Problems</a>
-          <a href="/discussions" className="hover:text-blue-300 focus:outline focus:ring-2 focus:ring-blue-900">Discussions</a>
-          <a href="/profile" className="hover:text-blue-300 focus:outline focus:ring-2 focus:ring-blue-900">Profile</a>
-        </nav>
-      </div>
-    </header>
+class NeuralNetwork:
+    def __init__(self, layers):
+        self.layers = layers
+        self.weights = []
+        self.biases = []
+        
+        # Initialize weights and biases
+        for i in range(len(layers) - 1):
+            # Your implementation here
+            pass
+    
+    def forward(self, X):
+        # Implement forward pass
+        pass
+    
+    def backward(self, X, y):
+        # Implement backpropagation
+        pass`,
+      hints: [
+        'Start by initializing weights using Xavier/He initialization',
+        'Remember to apply activation functions in forward pass',
+        'Calculate gradients using chain rule in reverse order'
+      ]
+    },
+    {
+      id: 2,
+      title: 'Transformer Attention Mechanism',
+      difficulty: 'Hard',
+      category: 'NLP',
+      solved: false,
+      likes: 189,
+      description: 'Build a multi-head attention mechanism from scratch.',
+      starterCode: `import torch
+import torch.nn as nn
 
-    {/* Hero Section */}
-    <section className="py-20 px-4 bg-gray-950/80 border-b border-gray-800 shadow-xl">
-      <div className="container mx-auto text-center">
-        <h2 className="text-5xl md:text-6xl font-extrabold text-blue-300 mb-6 font-sans drop-shadow-lg">
-          Elevate Your AI & ML Coding
-        </h2>
-        <p className="max-w-2xl mx-auto text-lg md:text-xl mb-10 text-gray-300">
-          Solve real-world problems in Artificial Intelligence, Machine Learning, Deep Learning, and Generative AI.  
-        </p>
-        <a
-          href="/problems"
-          className="inline-block px-10 py-4 text-lg font-bold rounded-lg bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600 transition text-white shadow-lg focus:outline focus:ring-2 focus:ring-blue-900"
-        >
-          Start Solving
-        </a>
-      </div>
-    </section>
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads):
+        super().__init__()
+        # Your implementation here
+        
+    def forward(self, query, key, value, mask=None):
+        # Implement attention mechanism
+        pass`,
+      hints: [
+        'Split d_model into num_heads for parallel attention',
+        'Compute attention scores using scaled dot-product',
+        'Apply softmax and use mask to handle padding'
+      ]
+    },
+    {
+      id: 3,
+      title: 'GAN Loss Function',
+      difficulty: 'Easy',
+      category: 'Generative AI',
+      solved: false,
+      likes: 156,
+      description: 'Implement the loss functions for a basic GAN.',
+      starterCode: `import torch
+import torch.nn.functional as F
 
-    {/* Features Section */}
-    <section className="container mx-auto px-4 py-12">
-      <div className="grid gap-8 grid-cols-1 md:grid-cols-3">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-md text-center">
-          <div className="text-3xl mb-3">🚀</div>
-          <h4 className="text-lg font-bold mb-2 text-blue-300">Real Coding Challenges</h4>
-          <p className="text-gray-300 text-sm">Practice with hands-on problems from AI, ML, Deep Learning, and Generative AI domains.</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-md text-center">
-          <div className="text-3xl mb-3">🧑‍💻</div>
-          <h4 className="text-lg font-bold mb-2 text-blue-300">Integrated IDE</h4>
-          <p className="text-gray-300 text-sm">Write, run, and test your code directly in the browser with Monaco Editor.</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-md text-center">
-          <div className="text-3xl mb-3">🌐</div>
-          <h4 className="text-lg font-bold mb-2 text-blue-300">Community & Feedback</h4>
-          <p className="text-gray-300 text-sm">Discuss solutions, get hints, and share feedback with a vibrant community.</p>
-        </div>
-      </div>
-    </section>
+def discriminator_loss(real_output, fake_output):
+    # Implement discriminator loss
+    pass
 
-    {/* Categories */}
-    <section className="container mx-auto px-4 py-12">
-      <h3 className="text-2xl md:text-3xl font-extrabold mb-8 text-gray-100 tracking-tight">Categories</h3>
-      <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        {categories.map((cat) => (
-          <a
-            key={cat.key}
-            href={cat.link}
-            className="block bg-gray-950/80 hover:bg-gray-900 border border-gray-800 rounded-xl p-7 transition shadow-lg group focus:outline focus:ring-2 focus:ring-blue-900"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-3xl group-hover:scale-110 transition-transform">{cat.icon}</span>
-              <div className="text-lg font-bold text-blue-300">{cat.title}</div>
-            </div>
-            <div className="text-gray-300 text-sm">{cat.desc}</div>
-          </a>
-        ))}
-      </div>
-    </section>
+def generator_loss(fake_output):
+    # Implement generator loss
+    pass`,
+      hints: [
+        'Use binary cross-entropy for discriminator loss',
+        'Discriminator should distinguish real from fake',
+        'Generator should fool the discriminator'
+      ]
+    }
+  ];
 
-    {/* Questions Feed */}
-    <section className="container mx-auto px-4 pb-16">
-      <h3 className="text-2xl md:text-3xl font-extrabold mb-8 text-gray-100 tracking-tight">Recent Questions</h3>
-      <div className="divide-y divide-gray-800 rounded-xl bg-gray-950/80 border border-gray-800 shadow-lg">
-        {questions.map((q, i) => (
-          <div key={i} className="flex items-center justify-between px-8 py-5 hover:bg-gray-900 transition">
-            <div>
-              <div className="font-semibold text-gray-100 text-lg">{q.title}</div>
-              <div className="text-xs text-gray-400 mt-1">{q.domain} &bull; {q.level}</div>
-            </div>
-            <a
-              href={`/problems/${i}`}
-              className="ml-8 py-2 px-6 rounded-lg font-bold bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600 transition text-white shadow focus:outline focus:ring-2 focus:ring-blue-900"
-            >
-              Solve
-            </a>
+  useEffect(() => {
+    // Set first problem as selected by default
+    if (problems.length > 0) {
+      setSelectedProblem(problems[0]);
+      setUserCode(problems[0].starterCode);
+    }
+  }, []);
+
+  const handleProblemSelect = (problem) => {
+    setSelectedProblem(problem);
+    setUserCode(problem.starterCode);
+    setTestResults(null);
+    setShowHints(false);
+  };
+
+  const handleRunCode = () => {
+    setIsRunning(true);
+    // Mock code execution
+    setTimeout(() => {
+      setTestResults({
+        passed: 2,
+        total: 3,
+        results: [
+          { name: 'Test Basic Functionality', passed: true, time: '0.12s' },
+          { name: 'Test Edge Cases', passed: true, time: '0.08s' },
+          { name: 'Test Performance', passed: false, time: '2.34s', error: 'Time limit exceeded' }
+        ]
+      });
+      setIsRunning(false);
+    }, 2000);
+  };
+
+  const handleSubmit = () => {
+    console.log('Submitting solution...');
+    // Mock submission logic
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    const colors = {
+      'Easy': 'text-green-400 bg-green-500/10',
+      'Medium': 'text-yellow-400 bg-yellow-500/10',
+      'Hard': 'text-red-400 bg-red-500/10'
+    };
+    return colors[difficulty] || 'text-gray-400 bg-gray-500/10';
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-dark-300 to-black">
+      <NavbarApp user={mockUser} />
+
+      <main className="pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Top metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <MetricCard
+              title="Problems Solved"
+              value="47"
+              subtitle="This month"
+              trend={12}
+            />
+            <MetricCard
+              title="Current Streak"
+              value="12"
+              subtitle="Days"
+              trend={0}
+            />
+            <MetricCard
+              title="Ranking"
+              value="#156"
+              subtitle="Global"
+              trend={-5}
+            />
+            <MetricCard
+              title="Accuracy"
+              value="89%"
+              subtitle="Average"
+              trend={3}
+            />
           </div>
-        ))}
-      </div>
-    </section>
 
-    {/* Footer */}
-    <footer className="bg-gray-950/90 py-8 border-t border-gray-800 text-center text-gray-500 text-xs font-sans shadow-inner">
-      <div className="mb-2">Made with <span className="text-blue-300">AI</span> & <span className="text-blue-300">Passion</span></div>
-      © {new Date().getFullYear()} CodeAI Platform
-    </footer>
-  </div>
-);
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Problem list */}
+            <div className="lg:col-span-1">
+              <div className="glass rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-white mb-6">Problem Set</h2>
+                <div className="space-y-3">
+                  {problems.map((problem) => (
+                    <button
+                      key={problem.id}
+                      onClick={() => handleProblemSelect(problem)}
+                      className={`
+                        w-full text-left p-4 rounded-lg border transition-all duration-200 focus-ring
+                        ${selectedProblem?.id === problem.id 
+                          ? 'border-cyan-500 bg-cyan-500/10' 
+                          : 'border-gray-700 hover:border-gray-600 hover:bg-white/5'
+                        }
+                      `}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-white text-sm">
+                          {problem.title}
+                        </h3>
+                        {problem.solved && (
+                          <CheckCircle className="h-4 w-4 text-green-400" />
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2 py-1 rounded ${getDifficultyColor(problem.difficulty)}`}>
+                          {problem.difficulty}
+                        </span>
+                        <span className="text-xs text-gray-500">{problem.category}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-export default HomePage;
+            {/* Main workspace */}
+            <div className="lg:col-span-2 space-y-6">
+              {selectedProblem && (
+                <>
+                  {/* Problem details */}
+                  <div className="glass rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h1 className="text-2xl font-bold text-white">
+                        {selectedProblem.title}
+                      </h1>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm px-3 py-1 rounded ${getDifficultyColor(selectedProblem.difficulty)}`}>
+                          {selectedProblem.difficulty}
+                        </span>
+                        <span className="text-sm text-gray-400">{selectedProblem.likes} likes</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed">
+                      {selectedProblem.description}
+                    </p>
+                  </div>
+
+                  {/* Code editor */}
+                  <div className="glass rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white">Solution</h2>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowHints(!showHints)}
+                        >
+                          <Lightbulb className="h-4 w-4 mr-2" />
+                          Hints ({selectedProblem.hints.length})
+                        </Button>
+                      </div>
+                    </div>
+
+                    <CodeShowcase
+                      code={userCode}
+                      height="h-80"
+                      enableTyping={false}
+                      className="mb-4"
+                    />
+
+                    {/* Code editor controls */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Button
+                          variant="secondary"
+                          onClick={handleRunCode}
+                          disabled={isRunning}
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          {isRunning ? 'Running...' : 'Run Code'}
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={handleSubmit}
+                          disabled={isRunning}
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit
+                        </Button>
+                      </div>
+                      
+                      {testResults && (
+                        <div className="flex items-center space-x-2 text-sm">
+                          <span className="text-gray-400">
+                            {testResults.passed}/{testResults.total} tests passed
+                          </span>
+                          {testResults.passed === testResults.total ? (
+                            <CheckCircle className="h-5 w-5 text-green-400" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-400" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hints panel */}
+                  {showHints && (
+                    <div className="glass rounded-xl p-6 border border-yellow-500/30">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <Lightbulb className="h-5 w-5 text-yellow-400 mr-2" />
+                        Hints
+                      </h3>
+                      <div className="space-y-3">
+                        {selectedProblem.hints.map((hint, index) => (
+                          <div key={index} className="flex items-start space-x-3">
+                            <span className="text-yellow-400 font-mono text-sm mt-1">
+                              {index + 1}.
+                            </span>
+                            <p className="text-gray-300 text-sm leading-relaxed">
+                              {hint}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Test results */}
+                  {testResults && (
+                    <div className="glass rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <Clock className="h-5 w-5 text-cyan-400 mr-2" />
+                        Test Results
+                      </h3>
+                      <div className="space-y-3">
+                        {testResults.results.map((result, index) => (
+                          <div 
+                            key={index}
+                            className={`
+                              flex items-center justify-between p-3 rounded-lg border
+                              ${result.passed 
+                                ? 'border-green-500/30 bg-green-500/5' 
+                                : 'border-red-500/30 bg-red-500/5'
+                              }
+                            `}
+                          >
+                            <div className="flex items-center space-x-3">
+                              {result.passed ? (
+                                <CheckCircle className="h-5 w-5 text-green-400" />
+                              ) : (
+                                <XCircle className="h-5 w-5 text-red-400" />
+                              )}
+                              <span className="text-white text-sm">{result.name}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-gray-400">
+                              <span>{result.time}</span>
+                              {result.error && (
+                                <span className="text-red-400">({result.error})</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Home;

@@ -1,566 +1,340 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import { Brain, Zap, Target, Users, Bot, Database, Network, Sparkles } from 'lucide-react';
+import NavbarPublic from '../components/NavbarPublic';
+import Footer from '../components/Footer';
+import Button from '../components/Button';
+import FeatureCard from '../components/FeatureCard';
+import CategoryCard from '../components/CategoryCard';
+import TestimonialCard from '../components/TestimonialCard';
+import CodeShowcase from '../components/CodeShowcase';
 
-const btnBase =
-  "inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition focus:outline-none focus-visible:ring-4";
-const primaryBtnBase = `${btnBase} text-white shadow-lg`;
-const secondaryBtnBase = `${btnBase} text-white/90 border border-white/10 bg-transparent`;
+/**
+ * Landing page for non-authenticated users
+ * Features hero section, feature grid, categories, testimonials
+ */
+const LandingPage = () => {
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
-const gradientBg = {
-  background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-};
+  // Sample code for the showcase
+  const showcaseCode = `import torch
+import torch.nn as nn
+from transformers import GPT2Model
 
-/* -------------------- CodeShowcase -------------------- */
-function CodeShowcase() {
-  const [text, setText] = useState("");
-  const [cursorVisible, setCursorVisible] = useState(true);
+class AIAgent(nn.Module):
+    def __init__(self, vocab_size, hidden_dim=512):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, hidden_dim)
+        self.transformer = GPT2Model.from_pretrained('gpt2')
+        self.classifier = nn.Linear(hidden_dim, vocab_size)
+        
+    def forward(self, x):
+        # Encode input sequence
+        embedded = self.embedding(x)
+        
+        # Process through transformer
+        output = self.transformer(embedded)
+        
+        # Generate predictions
+        logits = self.classifier(output.last_hidden_state)
+        
+        return logits
 
-  const lines = useMemo(
-    () => [
-      "# Solving: Multi-Class Image Classifier",
-      "import numpy as np",
-      "from sklearn.model_selection import train_test_split",
-      "from sklearn.metrics import accuracy_score",
-      "from sklearn.neural_network import MLPClassifier",
-      "",
-      "X_train, X_test, y_train, y_test = train_test_split(X, y,",
-      "                            random_state=42)",
-      "model = MLPClassifier(hidden_layer_sizes=(256,128),",
-      "                            activation='relu',",
-      "                            learning_rate_init=1e-3)",
-      "model.fit(X_train, y_train)",
-      "preds = model.predict(X_test)",
-      "print('Accuracy:', accuracy_score(y_test, preds))",
-    ],
-    []
-  );
+# Train the model
+model = AIAgent(vocab_size=50000)
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
-  // Typing effect (adds characters to `text`). Fixed box prevents layout shifts.
-  useEffect(() => {
-    const full = lines.join("\n");
-    if (text.length < full.length) {
-      const t = setTimeout(() => setText(full.slice(0, text.length + 1)), 18);
-      return () => clearTimeout(t);
-    }
-  }, [text, lines]);
+# Advanced training loop with gradient accumulation
+for epoch in range(100):
+    for batch in dataloader:
+        outputs = model(batch['input_ids'])
+        loss = criterion(outputs, batch['labels'])
+        
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+        
+    print(f"Epoch {epoch}: Loss = {loss.item():.4f}")`;
 
-  // Cursor blink
-  useEffect(() => {
-    const i = setInterval(() => setCursorVisible((c) => !c), 600);
-    return () => clearInterval(i);
-  }, []);
+  const handleSignUp = () => {
+    setIsSigningUp(true);
+    // Mock signup process
+    setTimeout(() => {
+      setIsSigningUp(false);
+      console.log('Redirecting to signup...');
+    }, 1000);
+  };
 
-  // Simple safe html escape
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  }
+  const handleSignIn = () => {
+    console.log('Redirecting to signin...');
+  };
 
-  // Tokenizer-based highlighter (avoids breaking entities)
-  function highlight(code) {
-    const keywords = new Set([
-      "import",
-      "from",
-      "class",
-      "def",
-      "return",
-      "print",
-      "for",
-      "while",
-      "if",
-      "else",
-      "elif",
-      "as",
-      "with",
-      "in",
-      "try",
-      "except",
-      "break",
-      "continue",
-      "pass",
-      "lambda",
-    ]);
-
-    let i = 0;
-    const n = code.length;
-    let out = "";
-
-    while (i < n) {
-      const ch = code[i];
-
-      // comment
-      if (ch === "#") {
-        const j = code.indexOf("\n", i);
-        const end = j === -1 ? n : j;
-        const comment = code.slice(i, end);
-        out += `<span class="text-green-400">${escapeHtml(comment)}</span>`;
-        i = end;
-        continue;
-      }
-
-      // string (single or double)
-      if (ch === '"' || ch === "'") {
-        const quote = ch;
-        let j = i + 1;
-        let escaped = false;
-        while (j < n) {
-          if (code[j] === "\\" && !escaped) {
-            escaped = true;
-            j++;
-            continue;
-          }
-          if (code[j] === quote && !escaped) {
-            j++;
-            break;
-          }
-          escaped = false;
-          j++;
-        }
-        const str = code.slice(i, Math.min(j, n));
-        out += `<span class="text-amber-300">${escapeHtml(str)}</span>`;
-        i = j;
-        continue;
-      }
-
-      // number
-      if (/\d/.test(ch)) {
-        const m = code.slice(i).match(/^\d+(\.\d+)?/);
-        if (m) {
-          out += `<span class="text-cyan-300">${escapeHtml(m[0])}</span>`;
-          i += m[0].length;
-          continue;
-        }
-      }
-
-      // identifier / function name / keyword
-      if (/[A-Za-z_]/.test(ch)) {
-        const m = code.slice(i).match(/^[A-Za-z_]\w*/);
-        if (m) {
-          const id = m[0];
-          const nextChar = code[i + id.length] || "";
-          if (keywords.has(id)) {
-            out += `<span class="text-pink-400">${escapeHtml(id)}</span>`;
-          } else if (nextChar === "(") {
-            out += `<span class="text-violet-300">${escapeHtml(id)}</span>`;
-          } else {
-            out += escapeHtml(id);
-          }
-          i += id.length;
-          continue;
-        }
-      }
-
-      // whitespace / punctuation
-      out += escapeHtml(ch);
-      i++;
-    }
-
-    return out;
-  }
-
-  return (
-    <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#0B0B0C] h-64 sm:h-72 md:h-80 lg:h-96">
-      {/* window chrome */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0F0F10]/90 backdrop-blur">
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-red-500/80" />
-          <span className="w-3 h-3 rounded-full bg-yellow-400/80" />
-          <span className="w-3 h-3 rounded-full bg-green-500/80" />
-        </div>
-        <div className="text-xs text-white/60 font-mono">classifier.py</div>
-        <div className="w-16" />
-      </div>
-
-      {/* code area (fixed height, scrollable) */}
-      <div className="relative p-6 font-mono text-sm leading-6 h-[calc(100%-3rem)] overflow-y-auto text-white custom-scrollbar">
-        {/* radial subtle color */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(400px 200px at 10% 10%, rgba(59,130,246,0.06), transparent 15%), radial-gradient(300px 150px at 85% 0%, rgba(139,92,246,0.05), transparent 12%)",
-          }}
-        />
-
-        {/* shimmer and overlay (pure css rules defined below) */}
-        <div className="pointer-events-none absolute inset-0 opacity-20">
-          <div className="absolute inset-0 shimmer" />
-        </div>
-
-        {/* highlighted code safely injected */}
-        <pre
-          className="relative whitespace-pre-wrap z-10 font-[SFMono-Regular,Menlo,Monaco,Consolas,monospace] text-sm"
-          dangerouslySetInnerHTML={{
-            __html:
-              highlight(text) +
-              `<span class="${cursorVisible ? "opacity-100 cursorGlow" : "opacity-0"}">|</span>`,
-          }}
-        />
-      </div>
-
-      {/* small inline styles (keyframes + scrollbar fallback for older browsers) */}
-      <style>{`
-        @keyframes shimmerAnim { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        @keyframes cursorGlowAnim { 0%{ text-shadow: 0 0 2px rgba(6,182,212,0.7); } 50%{ text-shadow: 0 0 8px rgba(6,182,212,0.85); } 100%{ text-shadow: 0 0 2px rgba(6,182,212,0.7); } }
-        .shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent); background-size: 200% 100%; animation: shimmerAnim 6s linear infinite; }
-        .cursorGlow { animation: cursorGlowAnim 1.2s steps(1,end) infinite; color: #9be7ff; }
-
-        /* Themed custom scrollbar (WebKit) */
-        .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          border-radius: 999px;
-          border: 2px solid rgba(11,11,12,0.55); /* inner border to blend with background */
-          background: linear-gradient(180deg, rgba(59,130,246,0.25), rgba(139,92,246,0.16));
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, rgba(59,130,246,0.38), rgba(139,92,246,0.26));
-        }
-
-        /* Firefox */
-        .custom-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(59,130,246,0.25) transparent; }
-
-        /* Global page scrollbar fallback (applies to body) */
-        body::-webkit-scrollbar { width: 10px; height: 10px; }
-        body::-webkit-scrollbar-track { background: transparent; }
-        body::-webkit-scrollbar-thumb {
-          border-radius: 999px;
-          border: 2px solid rgba(0,0,0,0.55);
-          background: linear-gradient(180deg, rgba(59,130,246,0.18), rgba(139,92,246,0.12));
-        }
-        body { scrollbar-color: rgba(59,130,246,0.18) transparent; }
-      `}</style>
-    </div>
-  );
-}
-
-/* -------------------- small svg icon -------------------- */
-function Icon({ path, className = "w-6 h-6" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d={path} />
-    </svg>
-  );
-}
-
-/* -------------------- FeatureCard -------------------- */
-function FeatureCard({ iconPath, title, description }) {
-  return (
-    <motion.div whileHover={{ y: -4 }} className="relative rounded-2xl p-[1px] bg-gradient-to-br from-cyan-500/25 to-violet-500/25">
-      <div className="relative h-full rounded-2xl bg-[#0F0F10]/80 backdrop-blur border border-white/10 p-6">
-        <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-xl text-cyan-300 bg-white/5 ring-1 ring-cyan-500/12">
-          <Icon className="w-6 h-6" path={iconPath} />
-        </div>
-        <h3 className="text-white font-semibold text-lg mb-2">{title}</h3>
-        <p className="text-white/70 text-sm leading-6">{description}</p>
-        <div className="pointer-events-none absolute -inset-px rounded-2xl shadow-[0_0_40px_-10px_rgba(59,130,246,0.18)]" />
-      </div>
-    </motion.div>
-  );
-}
-
-/* -------------------- CategoryCard -------------------- */
-function CategoryCard({ code, name, problems, gradient }) {
-  return (
-    <motion.div whileHover={{ y: -4, scale: 1.01 }} className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#0F0F10]" style={{ boxShadow: "0 10px 40px rgba(0,0,0,0.35)" }}>
-      <div className="absolute inset-0 opacity-70" style={{ background: gradient }} />
-      <div className="relative p-6 backdrop-blur-sm">
-        <div className="flex items-start justify-between mb-4">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-black/60 text-white font-bold text-lg border border-white/10">
-            {code}
-          </div>
-          <div className="text-right text-white">
-            <div className="text-2xl font-bold">{problems}</div>
-            <div className="text-white/70 text-xs">Problems</div>
-          </div>
-        </div>
-        <h4 className="text-white font-semibold text-xl mb-1">{name}</h4>
-        <p className="text-white/70 text-sm">Dive into curated challenges with real datasets & evaluation.</p>
-        <div className="mt-4 inline-flex items-center text-cyan-300 font-medium">
-          Start Learning
-          <svg className="w-5 h-5 ml-1 group-hover:translate-x-1 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-        </div>
-      </div>
-      <div className="pointer-events-none absolute inset-0 ring-1 ring-white/10 rounded-2xl" />
-    </motion.div>
-  );
-}
-
-/* -------------------- Main Landing Page -------------------- */
-export default function LandingPage() {
+  // Features data
   const features = [
     {
-      iconPath: "M3 12h7l-2 9 5-16 2 7h6",
-      title: "Real-world AI Problems",
-      description: "Work on industry-grade tasks spanning vision, NLP, and tabular ML with clear constraints and datasets.",
+      icon: Brain,
+      title: 'AI-Powered Learning',
+      description: 'Personalized learning paths adapted to your skill level with intelligent problem recommendations and hints.'
     },
     {
-      iconPath: "M12 20l4-8H8l4-8M4 20h16",
-      title: "Hints & Solutions",
-      description: "Unlock multi-step hints, editorial-grade explanations, and benchmark solutions when you’re stuck.",
+      icon: Zap,
+      title: 'Real-time Feedback',
+      description: 'Instant code execution and feedback with detailed explanations for optimal learning outcomes.'
     },
     {
-      iconPath: "M8 21v-7m8 7v-4M4 10l8-6 8 6-8 6-8-6z",
-      title: "Leaderboards",
-      description: "Compete on accuracy, runtime, and memory; climb weekly and all-time boards across tracks.",
+      icon: Target,
+      title: 'Skill Assessment',
+      description: 'Comprehensive skill evaluation with detailed analytics and progress tracking across all AI domains.'
     },
     {
-      iconPath: "M4 4h16v8H4V4zm0 12h10",
-      title: "Custom Test Cases",
-      description: "Create edge-case generators, run hidden tests, and compare diffs directly in the editor.",
-    },
+      icon: Users,
+      title: 'Community Driven',
+      description: 'Learn from peers, participate in challenges, and contribute to a growing community of AI practitioners.'
+    }
   ];
 
+  // Categories data
   const categories = [
     {
-      code: "AI",
-      name: "Artificial Intelligence",
-      problems: 42,
-      gradient: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.18))",
+      icon: Brain,
+      title: 'Machine Learning',
+      description: 'Classical ML algorithms, supervised/unsupervised learning, feature engineering.',
+      problemCount: 156,
+      color: 'blue'
     },
     {
-      code: "ML",
-      name: "Machine Learning",
-      problems: 58,
-      gradient: "linear-gradient(135deg, rgba(6,182,212,0.20), rgba(59,130,246,0.18))",
+      icon: Network,
+      title: 'Deep Learning',
+      description: 'Neural networks, CNNs, RNNs, transformers, and modern architectures.',
+      problemCount: 89,
+      color: 'purple'
     },
     {
-      code: "DL",
-      name: "Deep Learning",
-      problems: 51,
-      gradient: "linear-gradient(135deg, rgba(139,92,246,0.20), rgba(6,182,212,0.18))",
+      icon: Bot,
+      title: 'Generative AI',
+      description: 'LLMs, diffusion models, GANs, and cutting-edge generative techniques.',
+      problemCount: 67,
+      color: 'cyan'
     },
     {
-      code: "GenAI",
-      name: "Generative AI",
-      problems: 37,
-      gradient: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.25))",
-    },
+      icon: Database,
+      title: 'AI Engineering',
+      description: 'MLOps, model deployment, optimization, and production AI systems.',
+      problemCount: 43,
+      color: 'green'
+    }
   ];
 
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-
-  function submit(e) {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 1800);
-  }
+  // Testimonials data
+  const testimonials = [
+    {
+      content: "CodeAI transformed my understanding of machine learning. The progressive difficulty and real-world problems made learning both challenging and enjoyable.",
+      author: "Sarah Chen",
+      role: "ML Engineer",
+      company: "Google",
+      rating: 5
+    },
+    {
+      content: "The best platform for practicing AI concepts. The code execution environment and instant feedback helped me land my dream job at a top tech company.",
+      author: "Marcus Rodriguez",
+      role: "AI Research Scientist",
+      company: "OpenAI",
+      rating: 5
+    },
+    {
+      content: "As a beginner in AI, I was intimidated by the complexity. CodeAI's structured approach and community support made the journey manageable and fun.",
+      author: "Priya Patel",
+      role: "Data Scientist",
+      company: "Meta",
+      rating: 5
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white">
-      {/* animated gradient helper (used for text/button backgrounds) */}
-      <style>{`
-        @keyframes gradientMove { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
-        .animated-gradient-text { background: linear-gradient(90deg,#3B82F6,#06B6D4,#8B5CF6); background-size:200% 200%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: gradientMove 6s ease infinite; }
-        .animated-gradient-bg { background: linear-gradient(90deg,#3B82F6,#06B6D4,#8B5CF6); background-size:200% 200%; animation: gradientMove 6s ease infinite; }
-        .btn-focus { box-shadow: 0 0 0 6px rgba(59,130,246,0.06); }
-      `}</style>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-dark-300 to-black">
+      <NavbarPublic onSignIn={handleSignIn} onSignUp={handleSignUp} />
 
-      {/* decorative background */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[#0F0F10]" />
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full blur-3xl opacity-28" style={gradientBg} />
-        <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/16 to-transparent" />
-      </div>
-
-      {/* NAV */}
-      <header className="sticky top-0 z-40 border-b border-white/8 backdrop-blur bg-[#000000]/60">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl animated-gradient-bg shadow-lg" />
-            <span className="font-bold tracking-tight text-white">CodeAI</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8 text-white/70">
-            <a href="#features" className="hover:text-white transition">Features</a>
-            <a href="#categories" className="hover:text-white transition">Categories</a>
-            <a href="#testimonials" className="hover:text-white transition">Stories</a>
-          </nav>
-          <a href="#cta" className="hidden md:inline-flex text-sm px-4 py-2 rounded-lg border border-white/10 hover:bg-white/5">Get Started</a>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="relative -mt-4">
-        <div className="max-w-7xl mx-auto px-6 h-screen pb-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
-          {/* Left: text */}
-          <div className="flex flex-col justify-center">
-            <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl md:text-6xl lg:text-6xl font-extrabold leading-tight">
-              <span className="block">Master AI</span>
-              <span className="block animated-gradient-text">Problem-Solving</span>
-            </motion.h1>
-
-            <p className="mt-6 text-white/70 text-base md:text-lg max-w-xl">
-              Practice AI, ML, DL, and Generative AI challenges with a developer-first editor, step-by-step hints, and performance analytics.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <a
-                href="#categories"
-                className={`${primaryBtnBase} animated-gradient-bg btn-focus`}
-                style={{ minWidth: 140 }}
-              >
-                Start Coding
-              </a>
-
-              <a
-                href="#features"
-                className={`${secondaryBtnBase} btn-focus hover:text-cyan-300`}
-              >
-                View Features
-              </a>
-            </div>
-
-            <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
-              <div>
-                <div className="text-2xl font-bold text-white">500+</div>
-                <div className="text-xs text-white/60">Problems</div>
+      {/* Hero Section */}
+      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Hero content */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+                  Master{' '}
+                  <span className="gradient-text">
+                    AI Problem-Solving
+                  </span>
+                </h1>
+                <p className="text-xl text-gray-400 leading-relaxed max-w-2xl">
+                  Level up your artificial intelligence skills with hands-on challenges, 
+                  real-world projects, and an AI-powered learning companion.
+                </p>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-cyan-400">⏱️</div>
-                <div className="text-xs text-white/60">Runtime Scoring</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-violet-400">⚡</div>
-                <div className="text-xs text-white/60">Editor Hints</div>
-              </div>
-            </div>
-          </div>
 
-          {/* Right: code box (fixed size, centered) */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex justify-center items-center">
-            <div className="w-full max-w-md">
-              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-cyan-300 text-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                AI-Powered Learning Platform
-              </div>
-              <CodeShowcase />
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section id="features" className="relative py-20 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold">Why Choose CodeAI?</h2>
-            <p className="mt-3 text-white/70 max-w-2xl mx-auto">A developer-first platform with futuristic UI and rigorous evaluations.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) => (
-              <FeatureCard key={i} {...f} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORIES */}
-      <section id="categories" className="relative py-20 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold">Choose Your Track</h2>
-            <p className="mt-3 text-white/70 max-w-2xl mx-auto">Curated paths across AI disciplines with neon-glow interactions.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {categories.map((c, i) => (
-              <CategoryCard key={i} {...c} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section id="testimonials" className="relative py-20 border-t border-white/10 bg-[#0F0F10]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold">Loved by Learners</h2>
-            <p className="mt-3 text-white/70">Real stories from developers mastering AI.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[{
-              name: "Rajeev Kumar",
-              role: "DSAI · IIT Bhilai",
-              quote: "Clean UI, great problems, and editorial solutions that actually teach.",
-              avatar: "https://i.pravatar.cc/120?img=11",
-            }, {
-              name: "Aditya Rehpade",
-              role: "EE · IIT Bhilai",
-              quote: "Finally a platform tuned for AI workflows—from datasets to metrics.",
-              avatar: "https://i.pravatar.cc/120?img=12",
-            }, {
-              name: "Sana Iqbal",
-              role: "ML Engineer",
-              quote: "Leaderboards kept me accountable. The glow UI is slick.",
-              avatar: "https://i.pravatar.cc/120?img=32",
-            }].map((t, i) => (
-              <motion.div key={i} whileHover={{ y: -3 }} className="rounded-2xl p-6 border border-white/10 bg-white/5 backdrop-blur-xl">
-                <div className="flex items-center gap-4 mb-4">
-                  <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover" />
-                  <div>
-                    <div className="font-semibold">{t.name}</div>
-                    <div className="text-xs text-white/70">{t.role}</div>
-                  </div>
-                </div>
-                <p className="text-white/80 leading-6">“{t.quote}”</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section id="cta" className="relative py-20 border-t border-white/10">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <div className="rounded-3xl p-[1px]" style={gradientBg}>
-            <div className="rounded-3xl bg-[#0B0B0C] px-6 md:px-14 py-14">
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-3">Ready to Level Up?</h3>
-              <p className="text-white/70 mb-8">Join and start solving AI challenges with editor hints and analytics.</p>
-
-              <form onSubmit={submit} className="max-w-xl mx-auto flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 placeholder-white/40 focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-500/20"
-                />
-                <button
-                  type="submit"
-                  disabled={sent}
-                  className={`${primaryBtnBase} animated-gradient-bg ${sent ? "opacity-60" : ""} btn-focus cursor-pointer`}
-                  style={{ minWidth: 140 }}
+              {/* CTA buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  variant="primary" 
+                  size="lg"
+                  onClick={handleSignUp}
+                  disabled={isSigningUp}
+                  className="min-w-40"
                 >
-                  {sent ? "Sent!" : "Get Started"}
-                </button>
-              </form>
-              <div className="mt-3 text-xs text-white/60">Free • No credit card required</div>
+                  {isSigningUp ? 'Creating Account...' : 'Start Learning'}
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="lg"
+                  onClick={() => document.getElementById('features').scrollIntoView()}
+                >
+                  Explore Features
+                </Button>
+              </div>
+
+              {/* Quick stats */}
+              <div className="flex items-center space-x-8 pt-8 border-t border-gray-800/50">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">10k+</div>
+                  <div className="text-sm text-gray-400">Active Learners</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">355</div>
+                  <div className="text-sm text-gray-400">AI Problems</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">98%</div>
+                  <div className="text-sm text-gray-400">Success Rate</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Code showcase */}
+            <div className="lg:pl-8">
+              <CodeShowcase 
+                code={showcaseCode}
+                height="h-64 sm:h-72 lg:h-96"
+                className="shadow-2xl"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-white/10 py-10">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg animated-gradient-bg" />
-            <span className="font-semibold">CodeAI</span>
+      {/* Features Section */}
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Why Choose <span className="gradient-text">CodeAI</span>?
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Our platform combines cutting-edge technology with proven learning methodologies
+              to accelerate your AI journey.
+            </p>
           </div>
-          <div className="flex items-center gap-6 text-white/70">
-            <a href="#" className="hover:text-white">Privacy</a>
-            <a href="#" className="hover:text-white">Terms</a>
-            <a href="#" className="hover:text-white">Support</a>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
+            ))}
           </div>
-          <div className="text-white/50 text-sm">© {new Date().getFullYear()} CodeAI. All rights reserved.</div>
         </div>
-      </footer>
+      </section>
+
+      {/* Categories Section */}
+      <section id="categories" className="py-20 px-4 sm:px-6 lg:px-8 bg-black/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Explore <span className="gradient-text">AI Domains</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Choose your learning path from our comprehensive collection of AI and ML challenges.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {categories.map((category, index) => (
+              <CategoryCard
+                key={index}
+                icon={category.icon}
+                title={category.title}
+                description={category.description}
+                problemCount={category.problemCount}
+                color={category.color}
+                onClick={() => console.log(`Navigate to ${category.title}`)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Loved by <span className="gradient-text">Developers</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Join thousands of developers who have accelerated their AI careers with CodeAI.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <TestimonialCard
+                key={index}
+                content={testimonial.content}
+                author={testimonial.author}
+                role={testimonial.role}
+                company={testimonial.company}
+                rating={testimonial.rating}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
+        <div className="max-w-4xl mx-auto text-center">
+          <Sparkles className="h-12 w-12 text-cyan-400 mx-auto mb-6" />
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Ready to Start Your AI Journey?
+          </h2>
+          <p className="text-xl text-gray-400 mb-8">
+            Join our community of learners and start solving AI challenges today.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              variant="primary" 
+              size="lg"
+              onClick={handleSignUp}
+              disabled={isSigningUp}
+            >
+              {isSigningUp ? 'Creating Account...' : 'Get Started Free'}
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => document.getElementById('features').scrollIntoView()}
+            >
+              Learn More
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
-}
+};
+
+export default LandingPage;
