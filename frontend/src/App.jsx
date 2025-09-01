@@ -6,6 +6,10 @@ import Workspace from './pages/Workspace';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import LandingPage from './pages/LandingPage';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 /**
  * Main App component with routing configuration
@@ -25,6 +29,12 @@ function App() {
               isAuthenticated ? <Home /> : <LandingPage />
             } 
           />
+          
+          {/* Authentication routes */}
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Protected routes (for authenticated users) */}
           <Route path="/home" element={<Home />} />
