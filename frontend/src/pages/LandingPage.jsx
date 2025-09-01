@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Brain, Zap, Target, Users, Bot, Database, Network, Sparkles } from 'lucide-react';
 import NavbarPublic from '../components/NavbarPublic';
 import Footer from '../components/Footer';
@@ -13,6 +14,7 @@ import CodeShowcase from '../components/CodeShowcase';
  * Features hero section, feature grid, categories, testimonials
  */
 const LandingPage = () => {
+  const navigate = useNavigate();
   const [isSigningUp, setIsSigningUp] = useState(false);
 
   // Sample code for the showcase
@@ -56,16 +58,11 @@ for epoch in range(100):
     print(f"Epoch {epoch}: Loss = {loss.item():.4f}")`;
 
   const handleSignUp = () => {
-    setIsSigningUp(true);
-    // Mock signup process
-    setTimeout(() => {
-      setIsSigningUp(false);
-      console.log('Redirecting to signup...');
-    }, 1000);
+    navigate('/signup');
   };
 
   const handleSignIn = () => {
-    console.log('Redirecting to signin...');
+    navigate('/signin');
   };
 
   // Features data
@@ -151,7 +148,7 @@ for epoch in range(100):
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-dark-300 to-black">
-      <NavbarPublic onSignIn={handleSignIn} onSignUp={handleSignUp} />
+      <NavbarPublic />
 
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
@@ -317,9 +314,8 @@ for epoch in range(100):
               variant="primary" 
               size="lg"
               onClick={handleSignUp}
-              disabled={isSigningUp}
             >
-              {isSigningUp ? 'Creating Account...' : 'Get Started Free'}
+              Get Started Free
             </Button>
             <Button 
               variant="secondary" 

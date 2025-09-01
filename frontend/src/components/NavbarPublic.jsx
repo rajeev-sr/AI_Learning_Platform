@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, X, Code2 } from 'lucide-react';
 import Button from './Button';
 import PropTypes from 'prop-types';
@@ -7,7 +8,8 @@ import PropTypes from 'prop-types';
  * Public navbar for landing page (non-authenticated users)
  * Responsive with mobile hamburger menu
  */
-const NavbarPublic = ({ onSignIn, onSignUp }) => {
+const NavbarPublic = () => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -52,14 +54,14 @@ const NavbarPublic = ({ onSignIn, onSignUp }) => {
           <div className="hidden md:flex items-center space-x-4">
             <Button 
               variant="ghost" 
-              onClick={onSignIn}
+              onClick={() => navigate('/signin')}
               className="focus-ring"
             >
               Sign In
             </Button>
             <Button 
               variant="primary" 
-              onClick={onSignUp}
+              onClick={() => navigate('/signup')}
               className="focus-ring"
             >
               Sign Up
@@ -109,14 +111,14 @@ const NavbarPublic = ({ onSignIn, onSignUp }) => {
               <div className="flex flex-col space-y-2 pt-4 border-t border-gray-800/50">
                 <Button 
                   variant="ghost" 
-                  onClick={onSignIn}
+                  onClick={() => navigate('/signin')}
                   className="w-full focus-ring"
                 >
                   Sign In
                 </Button>
                 <Button 
                   variant="primary" 
-                  onClick={onSignUp}
+                  onClick={() => navigate('/signup')}
                   className="w-full focus-ring"
                 >
                   Sign Up
@@ -130,14 +132,6 @@ const NavbarPublic = ({ onSignIn, onSignUp }) => {
   );
 };
 
-NavbarPublic.propTypes = {
-  onSignIn: PropTypes.func,
-  onSignUp: PropTypes.func,
-};
-
-NavbarPublic.defaultProps = {
-  onSignIn: () => console.log('Sign in clicked'),
-  onSignUp: () => console.log('Sign up clicked'),
-};
+NavbarPublic.propTypes = {};
 
 export default NavbarPublic;
