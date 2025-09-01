@@ -5,8 +5,8 @@
 ### 📁 Project File Tree
 ```
 frontend/
-├── package.json                    # Dependencies and scripts
-├── index.html                      # Vite entry point
+├── package.json                   # Dependencies and scripts
+├── index.html                     # Vite entry point
 ├── tailwind.config.js             # Tailwind v4 configuration
 ├── vite.config.js                 # Vite build configuration
 ├── src/
